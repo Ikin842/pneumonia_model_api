@@ -6,13 +6,6 @@ from PIL import Image
 
 app = Flask(__name__)
 
-import torch
-import torch.nn as nn
-
-# Arsitektur Pneumonia
-import torch
-import torch.nn as nn
-
 class PneumoniaNet(nn.Module):
     def __init__(self, num_classes):
         super(PneumoniaNet, self).__init__()
@@ -76,7 +69,7 @@ def api():
 
         if image and allowed_file(image.filename):
             image_arr = Image.open(image)
-            image_arr = image_transform(image_arr).unsqueeze(0).to(device)
+            image_arr = image_transform(image_arr).unsqueeze(0).to('cpu')
             print("Model predicting ...")
             
             with torch.no_grad():
@@ -105,7 +98,7 @@ def predict():
 
             if image and allowed_file(image.filename):
                 image_arr = Image.open(image)
-                image_arr = image_transform(image_arr).unsqueeze(0).to(device)
+                image_arr = image_transform(image_arr).unsqueeze(0).to('cpu')
                 print("Predicting ...")
                 with torch.no_grad():
                     output = model(image_arr)
@@ -131,13 +124,10 @@ if __name__ == '__main__':
         'num_classes' : 2
     }
 
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
     model = PneumoniaNet(config['num_classes'])
-    # model.load_state_dict(torch.load(weights_path, map_location=device), strict=False)
     checkpoint = torch.load(checkpoint_path,  map_location=torch.device('cpu'))
     model.load_state_dict(checkpoint['model_state_dict'], strict=False)
-    model = model.to(device)
+    model = model.to('cpu')
     model.eval()
 
     app.run(debug=True)
