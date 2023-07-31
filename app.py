@@ -35,6 +35,17 @@ class PneumoniaNet(nn.Module):
         x = self.classifier(x)
         return x
 
+checkpoint_path = 'checkpoint.pt'
+config = {
+    'num_classes' : 2
+}
+
+model = PneumoniaNet(config['num_classes'])
+checkpoint = torch.load(checkpoint_path,  map_location=torch.device('cpu'))
+model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+model = model.to('cpu')
+model.eval()
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
@@ -119,15 +130,6 @@ def predict():
         return render_template('index.html', appName="Pneumonia Detection")
 
 if __name__ == '__main__':
-    checkpoint_path = 'checkpoint.pt'
-    config = {
-        'num_classes' : 2
-    }
 
-    model = PneumoniaNet(config['num_classes'])
-    checkpoint = torch.load(checkpoint_path,  map_location=torch.device('cpu'))
-    model.load_state_dict(checkpoint['model_state_dict'], strict=False)
-    model = model.to('cpu')
-    model.eval()
 
     app.run(debug=True)
